@@ -26,7 +26,7 @@ const isGitHubPages = window.location.hostname !== 'localhost';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Router basename={isGitHubPages ? "/Face-AMS" : "/"}>
+    <Router basename="/Face-AMS/">
       <Routes>
         <Route path="/" element={<AuthRoute><App /></AuthRoute>} />
         <Route path="/login" element={<Login />} />
