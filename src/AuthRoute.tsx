@@ -6,8 +6,7 @@ export interface IAuthRouteProps {
     children: React.ReactNode;
 }
 
-const AuthRoute: React.FunctionComponent<IAuthRouteProps> = (props) => {
-    const { children } = props;
+const AuthRoute: React.FunctionComponent<IAuthRouteProps> = ({ children }) => {
     const auth = getAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -15,15 +14,19 @@ const AuthRoute: React.FunctionComponent<IAuthRouteProps> = (props) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
+            if (!user) {
+                navigate('/login'); // Redirect to login if user is not authenticated
+            } else {
+                setUser(user);
+            }
             setLoading(false);
         });
         return () => unsubscribe();
-    }, [auth]);
+    }, [auth, navigate]); // ✅ Added `navigate` to dependencies
 
     if (loading) return <p>Loading...</p>;
 
-    return <div>{children}</div>;
+    return user ? <div>{children}</div> : null; // ✅ Ensures only authenticated users see content
 };
 
 export default AuthRoute;
