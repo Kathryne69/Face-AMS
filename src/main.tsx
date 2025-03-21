@@ -25,11 +25,11 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<AuthRoute><App /></AuthRoute>} />
+        <Route path="/" element={<App />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/professor" element={<Professor />} />
-        <Route path="/student" element={<Student />} />
+        <Route path="/professor" element={<AuthRoute><Professor /></AuthRoute>} />
+        <Route path="/student" element={<AuthRoute><Student /></AuthRoute>} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>

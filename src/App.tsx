@@ -1,72 +1,57 @@
-import { useNavigate } from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import studentIcon from "/stud.png";  // Ensure correct path
+import professorIcon from "/prof.png"; // Ensure correct path
+import background from "/classroom.jpg";
 
 const App = () => {
     const navigate = useNavigate();
-    const auth = getAuth();
-    const [role, setRole] = useState("");
-    const [professorPassword, setProfessorPassword] = useState("");
-    const [error, setError] = useState("");
+    const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-    const handleLogout = async () => {
-        await signOut(auth);
+    const handleRoleSelection = (role: string) => {
+        setSelectedRole(role);
+        localStorage.setItem("role", role);
         navigate("/login");
     };
 
-    const handleProfessorLogin = () => {
-        if (professorPassword === "6969") {
-            navigate("/professor"); // Redirect if correct
-        } else {
-            setError("Incorrect password! Try again.");
-        }
-    };
-
     return (
-        <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-200">
-            <h1 className="text-4xl font-bold text-green-700 mb-4">Choose Your Role</h1>
-
-            <div className="flex gap-4">
-                <button 
-                    className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600"
-                    onClick={() => navigate("/student")} 
-                >
-                    Student
-                </button>
-
-                <button 
-                    className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-800"
-                    onClick={() => setRole("professor")}
-                >
-                    Professor
-                </button>
-            </div>
-
-            {role === "professor" && (
-                <div className="mt-6 flex flex-col items-center">
-                    <input 
-                        type="password"
-                        placeholder="Enter Professor Password"
-                        className="border border-gray-400 px-4 py-2 rounded-md"
-                        value={professorPassword}
-                        onChange={(e) => setProfessorPassword(e.target.value)}
-                    />
-                    <button 
-                        className="mt-3 bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-800"
-                        onClick={handleProfessorLogin}
+        <div 
+            className="w-full h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${background})` }} // Inline background image
+        >
+            <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8 flex flex-col items-center">
+                <h3 className="text-3xl font-bold text-[#1a3d2f] mb-4 text-center">Select User Type</h3>
+                <p className="text-gray-600 text-center mb-6">Please select your role to proceed.</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Student Card */}
+                    <div
+                        className={`w-48 h-56 flex flex-col items-center justify-center border-2 rounded-lg cursor-pointer transition ${
+                            selectedRole === "student"
+                                ? "border-green-500 bg-green-50 shadow-md"
+                                : "border-gray-300 hover:border-green-500 hover:bg-green-50"
+                        }`}
+                        onClick={() => handleRoleSelection("student")}
                     >
-                        Submit
-                    </button>
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                </div>
-            )}
+                        <img src={studentIcon} alt="Student" className="w-32 h-32 mb-2" />
+                        <p className="text-lg font-semibold text-gray-700">Student</p>
+                    </div>
 
-            <button 
-                onClick={handleLogout}
-                className="mt-6 bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600"
-            >
-                Logout
-            </button>
+                    {/* Professor Card */}
+                    <div
+                        className={`w-48 h-56 flex flex-col items-center justify-center border-2 rounded-lg cursor-pointer transition ${
+                            selectedRole === "professor"
+                                ? "border-blue-500 bg-blue-50 shadow-md"
+                                : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+                        }`}
+                        onClick={() => handleRoleSelection("professor")}
+                    >
+                        <img src={professorIcon} alt="Professor" className="w-32 h-32 mb-2" />
+                        <p className="text-lg font-semibold text-gray-700">Professor</p>
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 };

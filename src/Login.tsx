@@ -11,18 +11,24 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
+    // Function to determine where to navigate after login
+    const redirectToDashboard = () => {
+        const role = localStorage.getItem("role"); // Get the selected role from localStorage
+        navigate(role === "professor" ? "/professor" : "/student");
+    };
+
     const signInWithGoogle = async () => {
         setAuthing(true);
         signInWithPopup(auth, new GoogleAuthProvider())
             .then(response => {
                 console.log(response.user.uid);
-                navigate('/');
+                redirectToDashboard(); // Navigate based on role
             })
             .catch(error => {
                 console.log(error);
                 setAuthing(false);
             });
-    }
+    };
 
     const signInWithEmail = async () => {
         setAuthing(true);
@@ -31,14 +37,14 @@ const Login = () => {
         signInWithEmailAndPassword(auth, email, password)
             .then(response => {
                 console.log(response.user.uid);
-                navigate('/');
+                redirectToDashboard(); // Navigate based on role
             })
             .catch(error => {
                 console.log(error);
                 setError(error.message);
                 setAuthing(false);
             });
-    }
+    };
 
     return (
         <div className="w-full h-screen flex items-center justify-center bg-[url('/classroom.jpg')] bg-cover bg-center bg-no-repeat">
@@ -105,6 +111,6 @@ const Login = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Login;

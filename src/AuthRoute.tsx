@@ -10,25 +10,20 @@ const AuthRoute: React.FunctionComponent<IAuthRouteProps> = (props) => {
     const { children } = props;
     const auth = getAuth();
     const navigate = useNavigate();
-    const [ loading, setLoading ] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setLoading(false);
-            } else {
-                console.log('unauthorized');
-                setLoading(false);
-                navigate('/login')
-            }
+            setUser(user);
+            setLoading(false);
         });
         return () => unsubscribe();
-    }, [auth, navigate]);
+    }, [auth]);
 
-    if (loading) return <p></p>;
+    if (loading) return <p>Loading...</p>;
 
-    return <div>{ children }</div>;
+    return <div>{children}</div>;
+};
 
-}
-
-export default AuthRoute
+export default AuthRoute;

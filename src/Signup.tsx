@@ -12,12 +12,18 @@ const Signup = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
 
+    // Function to determine where to navigate after sign-up
+    const redirectToDashboard = () => {
+        const role = localStorage.getItem("role"); // Get role from localStorage
+        navigate(role === "professor" ? "/professor" : "/student");
+    };
+
     const signUpWithGoogle = async () => {
         setAuthing(true);
         signInWithPopup(auth, new GoogleAuthProvider())
             .then(response => {
                 console.log(response.user.uid);
-                navigate('/');
+                redirectToDashboard(); // Navigate based on role
             })
             .catch(error => {
                 console.log(error);
@@ -37,7 +43,7 @@ const Signup = () => {
         createUserWithEmailAndPassword(auth, email, password)
             .then(response => {
                 console.log(response.user.uid);
-                navigate('/');
+                redirectToDashboard(); // Navigate based on role
             })
             .catch(error => {
                 console.log(error);
@@ -111,6 +117,6 @@ const Signup = () => {
             </div>
         </div>
     );
-}
+};
 
 export default Signup;
