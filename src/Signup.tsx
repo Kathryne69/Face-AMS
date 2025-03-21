@@ -102,7 +102,7 @@ const Signup = () => {
                 <div className='w-full flex items-center justify-center mt-6'>
                     <p className='text-sm font-normal text-gray-600'>Already have an account? 
                         <span className='font-semibold text-gray-800 cursor-pointer underline ml-1'>
-                            <a href='/Face-AMS/login'>Log In</a>
+                            <a href='#/login'>Log In</a>
                         </span>
                     </p>
                 </div>
