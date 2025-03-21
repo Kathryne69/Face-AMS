@@ -1,6 +1,6 @@
 {
   "homepage": "https://Kathryne69.github.io/Face-AMS",
-  "name": "authentication",
+  "name": "Face AMS",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
   },
   "dependencies": {
     "firebase": "^10.12.4",
