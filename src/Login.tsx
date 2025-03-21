@@ -96,7 +96,7 @@ const Login = () => {
                 <div className='w-full flex items-center justify-center mt-6'>
                     <p className='text-sm font-normal text-gray-600'>Don't have an account? 
                         <span className='font-semibold text-gray-800 cursor-pointer underline ml-1'>
-                            <a href='#/signup'>Sign Up</a>
+                            <a href='/signup'>Sign Up</a>
                         </span>
                     </p>
                 </div>
