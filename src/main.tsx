@@ -6,7 +6,7 @@ import Signup from './Signup.tsx';
 import Professor from './professor.tsx';
 import Student from './student.tsx';
 import './index.css';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { initializeApp } from "firebase/app";
 import AuthRoute from './AuthRoute.tsx';
 
@@ -23,7 +23,7 @@ initializeApp(firebaseConfig);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Router basename="/Face-AMS">
+    <Router>
       <Routes>
         <Route path="/" element={<AuthRoute><App /></AuthRoute>} />
         <Route path="/login" element={<Login />} />
