@@ -1,7 +1,15 @@
 // components/Sidebar.tsx
 import { FiUser, FiCheckSquare, FiLogOut } from "react-icons/fi";
 
-const Sidebar = ({ isSidebarOpen, activeTab, setActiveTab, handleLogout }) => {
+// ✅ Define TypeScript interface for props
+interface SidebarProps {
+    isSidebarOpen: boolean;
+    activeTab: string;
+    setActiveTab: (tab: string) => void;
+    handleLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, activeTab, setActiveTab, handleLogout }) => {
     return (
         <div className={`bg-green-900 text-white h-full transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
             <nav className="mt-4 space-y-6 p-4">

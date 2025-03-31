@@ -16,24 +16,21 @@ const StudentDashboard = () => {
     const [userName, setUserName] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Example email-to-name mapping (Update this as needed)
     const emailToNameMap: { [key: string]: string } = {
         "student1@face.ams": "Dela Pieza, Mark Jaspher",
         "student2@face.ams": "Navarro, Jules Rhenz",
     };
 
-    // Set userName based on logged-in user's email
     useEffect(() => {
         const user = auth.currentUser;
         if (user) {
-            console.log("Logged-in Email:", user.email); // Debugging
+            console.log("Logged-in Email:", user.email);
             const mappedName = emailToNameMap[user.email || ""] || null;
-            console.log("Mapped Name:", mappedName); // Debugging
+            console.log("Mapped Name:", mappedName);
             setUserName(mappedName);
         }
     }, [auth]);
 
-    // Fetch attendance records (ignoring timestamp, searching by student name)
     useEffect(() => {
         if (activeTab === "Attendance" && userName) {
             setLoading(true);
@@ -41,15 +38,14 @@ const StudentDashboard = () => {
 
             onValue(attendanceRef, (snapshot) => {
                 const data = snapshot.val();
-                console.log("Fetched Data:", data); // Debugging
+                console.log("Fetched Data:", data);
 
                 if (data) {
                     const studentRecords: { timestamp: string; status: string; pattern: string }[] = [];
 
-                    // Loop through all attendance entries
-                    Object.entries(data).forEach(([timestampKey, studentList]: any) => {
-                        if (studentList[userName]) { // Check if student exists
-                            console.log("Matched Record:", studentList[userName]); // Debugging
+                    Object.entries(data).forEach(([_, studentList]: any) => { // ✅ FIXED HERE
+                        if (studentList[userName]) {
+                            console.log("Matched Record:", studentList[userName]);
 
                             studentRecords.push({
                                 timestamp: studentList[userName].timestamp,
@@ -61,7 +57,7 @@ const StudentDashboard = () => {
 
                     setAttendance(studentRecords);
                 } else {
-                    setAttendance([]); // No records found
+                    setAttendance([]);
                 }
                 setLoading(false);
             }, (error) => {
@@ -79,14 +75,11 @@ const StudentDashboard = () => {
 
     return (
         <div className="h-screen flex flex-col">
-            {/* Top Bar */}
             <TopBar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
             <div className="flex flex-grow">
-                {/* Sidebar */}
                 <Sidebar isSidebarOpen={isSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
-                {/* Main Content */}
                 <div className="flex-1 p-6">
                     {activeTab === "Profile" && (
                         <div>

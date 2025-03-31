@@ -12,7 +12,7 @@ const ProfessorDashboard = () => {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [activeTab, setActiveTab] = useState("Profile");
-    const [attendance, setAttendance] = useState([]);
+    const [attendance, setAttendance] = useState<{ name: string; timestamp: string; status: string; pattern: string }[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -24,13 +24,13 @@ const ProfessorDashboard = () => {
 
             onValue(attendanceRef, (snapshot) => {
                 const data = snapshot.val();
-                console.log("Firebase Data:", data); // Debugging
+                console.log("Firebase Data:", data);
 
                 if (data) {
-                    const allRecords = [];
+                    const allRecords: { name: string; timestamp: string; status: string; pattern: string }[] = [];
 
-                    Object.entries(data).forEach(([timestampKey, studentList]) => {
-                        Object.entries(studentList).forEach(([studentName, record]) => {
+                    Object.entries(data).forEach(([, studentList]) => {
+                        Object.entries(studentList as Record<string, { timestamp: string; status: string; attendance_pattern: string }>).forEach(([studentName, record]) => {
                             allRecords.push({
                                 name: studentName,
                                 timestamp: record.timestamp,
@@ -40,7 +40,7 @@ const ProfessorDashboard = () => {
                         });
                     });
 
-                    console.log("Processed Attendance Records:", allRecords); // Debugging
+                    console.log("Processed Attendance Records:", allRecords);
                     setAttendance(allRecords);
                 } else {
                     console.log("No attendance data found.");
