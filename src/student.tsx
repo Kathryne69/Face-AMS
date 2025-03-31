@@ -1,13 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
+import { getDatabase, ref, onValue } from "firebase/database";
 import { useNavigate } from "react-router-dom";
-import { FiMenu, FiUser, FiCheckSquare, FiLogOut } from "react-icons/fi";
+import Sidebar from "./components/sidebar";
+import TopBar from "./components/topbar";
 
 const StudentDashboard = () => {
     const auth = getAuth();
     const navigate = useNavigate();
+    const db = getDatabase();
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [activeTab, setActiveTab] = useState("Profile");
+    const [attendance, setAttendance] = useState<{ timestamp: string; status: string; pattern: string }[]>([]);
+    const [userName, setUserName] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    // Example email-to-name mapping (Update this as needed)
+    const emailToNameMap: { [key: string]: string } = {
+        "student1@face.ams": "Dela Pieza, Mark Jaspher",
+        "student2@face.ams": "Navarro, Jules Rhenz",
+    };
+
+    // Set userName based on logged-in user's email
+    useEffect(() => {
+        const user = auth.currentUser;
+        if (user) {
+            console.log("Logged-in Email:", user.email); // Debugging
+            const mappedName = emailToNameMap[user.email || ""] || null;
+            console.log("Mapped Name:", mappedName); // Debugging
+            setUserName(mappedName);
+        }
+    }, [auth]);
+
+    // Fetch attendance records (ignoring timestamp, searching by student name)
+    useEffect(() => {
+        if (activeTab === "Attendance" && userName) {
+            setLoading(true);
+            const attendanceRef = ref(db, "attendance_records");
+
+            onValue(attendanceRef, (snapshot) => {
+                const data = snapshot.val();
+                console.log("Fetched Data:", data); // Debugging
+
+                if (data) {
+                    const studentRecords: { timestamp: string; status: string; pattern: string }[] = [];
+
+                    // Loop through all attendance entries
+                    Object.entries(data).forEach(([timestampKey, studentList]: any) => {
+                        if (studentList[userName]) { // Check if student exists
+                            console.log("Matched Record:", studentList[userName]); // Debugging
+
+                            studentRecords.push({
+                                timestamp: studentList[userName].timestamp,
+                                status: studentList[userName].status,
+                                pattern: studentList[userName].attendance_pattern,
+                            });
+                        }
+                    });
+
+                    setAttendance(studentRecords);
+                } else {
+                    setAttendance([]); // No records found
+                }
+                setLoading(false);
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                setLoading(false);
+            });
+        }
+    }, [activeTab, userName, db]);
 
     const handleLogout = () => {
         signOut(auth)
@@ -18,62 +80,38 @@ const StudentDashboard = () => {
     return (
         <div className="h-screen flex flex-col">
             {/* Top Bar */}
-            <div className="bg-gray-900 text-white flex items-center justify-between p-4 shadow-md">
-                <button className="p-2 text-white" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    <FiMenu size={30} />
-                </button>
-
-                <h1 className="text-xl font-bold">{activeTab}</h1>
-
-                <div className="flex space-x-4">
-                    <button className={`p-2 rounded-md ${activeTab === "Profile" ? "bg-gray-700" : "hover:bg-gray-800"}`} 
-                        onClick={() => setActiveTab("Profile")}>
-                        <FiUser size={24} />
-                    </button>
-                    <button className={`p-2 rounded-md ${activeTab === "Attendance" ? "bg-gray-700" : "hover:bg-gray-800"}`} 
-                        onClick={() => setActiveTab("Attendance")}>
-                        <FiCheckSquare size={24} />
-                    </button>
-                    <button className="p-2 rounded-md hover:bg-red-600 transition" onClick={handleLogout}>
-                        <FiLogOut size={24} />
-                    </button>
-                </div>
-            </div>
+            <TopBar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
             <div className="flex flex-grow">
                 {/* Sidebar */}
-                <div className={`bg-green-900 text-white h-full transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
-                    <nav className="mt-4 space-y-6 p-4">
-                        <button className={`flex items-center space-x-4 w-full p-3 rounded-md text-lg ${activeTab === "Profile" ? "bg-green-700" : "hover:bg-green-800"}`} 
-                            onClick={() => setActiveTab("Profile")}>
-                            <FiUser size={30} />
-                            {isSidebarOpen && <span>Profile</span>}
-                        </button>
-                        <button className={`flex items-center space-x-4 w-full p-3 rounded-md text-lg ${activeTab === "Attendance" ? "bg-green-700" : "hover:bg-green-800"}`} 
-                            onClick={() => setActiveTab("Attendance")}>
-                            <FiCheckSquare size={30} />
-                            {isSidebarOpen && <span>Attendance</span>}
-                        </button>
-                        <button className="flex items-center space-x-4 w-full p-3 rounded-md text-lg hover:bg-red-600"
-                            onClick={handleLogout}>
-                            <FiLogOut size={30} />
-                            {isSidebarOpen && <span>Logout</span>}
-                        </button>
-                    </nav>
-                </div>
+                <Sidebar isSidebarOpen={isSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
                 {/* Main Content */}
                 <div className="flex-1 p-6">
                     {activeTab === "Profile" && (
                         <div>
                             <h2 className="text-2xl font-semibold">Profile Section</h2>
-                            <p>Student profile details...</p>
+                            <p>Welcome, {userName || "Student"}!</p>
                         </div>
                     )}
                     {activeTab === "Attendance" && (
                         <div>
-                            <h2 className="text-2xl font-semibold">Attendance Section</h2>
-                            <p>Attendance records...</p>
+                            <h2 className="text-2xl font-semibold">Attendance Records</h2>
+                            {loading ? (
+                                <p>Loading...</p>
+                            ) : attendance.length > 0 ? (
+                                <ul className="mt-4 space-y-4">
+                                    {attendance.map((record, index) => (
+                                        <li key={index} className="p-4 bg-gray-100 rounded-md shadow-md">
+                                            <strong>📅 Date:</strong> {record.timestamp} <br />
+                                            <strong>✅ Status:</strong> {record.status} <br />
+                                            <strong>📊 Pattern:</strong> {record.pattern}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>No attendance records found.</p>
+                            )}
                         </div>
                     )}
                 </div>

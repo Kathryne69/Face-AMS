@@ -13,6 +13,7 @@ import AuthRoute from './AuthRoute.tsx';
 const firebaseConfig = {
   apiKey: "AIzaSyCbRdbjZWY36SODtKK9kjw0sZ2Ro84rCxs",
   authDomain: "face-ams-1fa9f.firebaseapp.com",
+  databaseURL: "https://face-ams-1fa9f-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "face-ams-1fa9f",
   storageBucket: "face-ams-1fa9f.firebasestorage.app",
   messagingSenderId: "366142425812",

@@ -1,13 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
+import { getDatabase, ref, onValue } from "firebase/database";
 import { useNavigate } from "react-router-dom";
-import { FiMenu, FiUser, FiCheckSquare, FiLogOut } from "react-icons/fi";
+import Sidebar from "./components/sidebar";
+import TopBar from "./components/topbar";
 
 const ProfessorDashboard = () => {
     const auth = getAuth();
     const navigate = useNavigate();
+    const db = getDatabase();
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [activeTab, setActiveTab] = useState("Profile");
+    const [attendance, setAttendance] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (activeTab === "Attendance") {
+            setLoading(true);
+            console.log("Fetching attendance records...");
+
+            const attendanceRef = ref(db, "attendance_records");
+
+            onValue(attendanceRef, (snapshot) => {
+                const data = snapshot.val();
+                console.log("Firebase Data:", data); // Debugging
+
+                if (data) {
+                    const allRecords = [];
+
+                    Object.entries(data).forEach(([timestampKey, studentList]) => {
+                        Object.entries(studentList).forEach(([studentName, record]) => {
+                            allRecords.push({
+                                name: studentName,
+                                timestamp: record.timestamp,
+                                status: record.status,
+                                pattern: record.attendance_pattern,
+                            });
+                        });
+                    });
+
+                    console.log("Processed Attendance Records:", allRecords); // Debugging
+                    setAttendance(allRecords);
+                } else {
+                    console.log("No attendance data found.");
+                    setAttendance([]);
+                }
+
+                setLoading(false);
+            }, (error) => {
+                console.error("Firebase Error:", error);
+                setLoading(false);
+            });
+        }
+    }, [activeTab, db]);
 
     const handleLogout = () => {
         signOut(auth)
@@ -17,52 +63,11 @@ const ProfessorDashboard = () => {
 
     return (
         <div className="h-screen flex flex-col">
-            {/* Top Bar */}
-            <div className="bg-gray-900 text-white flex items-center justify-between p-4 shadow-md">
-                <button className="p-2 text-white" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
-                    <FiMenu size={30} />
-                </button>
-
-                <h1 className="text-xl font-bold">{activeTab}</h1>
-
-                <div className="flex space-x-4">
-                    <button className={`p-2 rounded-md ${activeTab === "Profile" ? "bg-gray-700" : "hover:bg-gray-800"}`} 
-                        onClick={() => setActiveTab("Profile")}>
-                        <FiUser size={24} />
-                    </button>
-                    <button className={`p-2 rounded-md ${activeTab === "Attendance" ? "bg-gray-700" : "hover:bg-gray-800"}`} 
-                        onClick={() => setActiveTab("Attendance")}>
-                        <FiCheckSquare size={24} />
-                    </button>
-                    <button className="p-2 rounded-md hover:bg-red-600 transition" onClick={handleLogout}>
-                        <FiLogOut size={24} />
-                    </button>
-                </div>
-            </div>
+            <TopBar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
             <div className="flex flex-grow">
-                {/* Sidebar */}
-                <div className={`bg-green-900 text-white h-full transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}>
-                    <nav className="mt-4 space-y-6 p-4">
-                        <button className={`flex items-center space-x-4 w-full p-3 rounded-md text-lg ${activeTab === "Profile" ? "bg-green-700" : "hover:bg-green-800"}`} 
-                            onClick={() => setActiveTab("Profile")}>
-                            <FiUser size={30} />
-                            {isSidebarOpen && <span>Profile</span>}
-                        </button>
-                        <button className={`flex items-center space-x-4 w-full p-3 rounded-md text-lg ${activeTab === "Attendance" ? "bg-green-700" : "hover:bg-green-800"}`} 
-                            onClick={() => setActiveTab("Attendance")}>
-                            <FiCheckSquare size={30} />
-                            {isSidebarOpen && <span>Attendance</span>}
-                        </button>
-                        <button className="flex items-center space-x-4 w-full p-3 rounded-md text-lg hover:bg-red-600"
-                            onClick={handleLogout}>
-                            <FiLogOut size={30} />
-                            {isSidebarOpen && <span>Logout</span>}
-                        </button>
-                    </nav>
-                </div>
+                <Sidebar isSidebarOpen={isSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
-                {/* Main Content */}
                 <div className="flex-1 p-6">
                     {activeTab === "Profile" && (
                         <div>
@@ -72,8 +77,23 @@ const ProfessorDashboard = () => {
                     )}
                     {activeTab === "Attendance" && (
                         <div>
-                            <h2 className="text-2xl font-semibold">Attendance Section</h2>
-                            <p>Manage attendance records...</p>
+                            <h2 className="text-2xl font-semibold">All Attendance Records</h2>
+                            {loading ? (
+                                <p>Loading...</p>
+                            ) : attendance.length > 0 ? (
+                                <ul className="mt-4 space-y-4">
+                                    {attendance.map((record, index) => (
+                                        <li key={index} className="p-4 bg-gray-100 rounded-md shadow-md">
+                                            <strong>👤 Student:</strong> {record.name} <br />
+                                            <strong>📅 Date:</strong> {record.timestamp} <br />
+                                            <strong>✅ Status:</strong> {record.status} <br />
+                                            <strong>📊 Pattern:</strong> {record.pattern}
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>No attendance records found.</p>
+                            )}
                         </div>
                     )}
                 </div>
