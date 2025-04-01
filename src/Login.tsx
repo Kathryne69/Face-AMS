@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import { useState, useEffect } from 'react';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+//import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth'; //FOR GOOGLE EMAIL
 
 const Login = () => {
     const auth = getAuth();
@@ -10,13 +11,20 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [role, setRole] = useState<string | null>(null); // Store user role
+
+    // Fetch role from localStorage on component mount
+    useEffect(() => {
+        const storedRole = localStorage.getItem("role");
+        setRole(storedRole);
+    }, []);
 
     // Function to determine where to navigate after login
     const redirectToDashboard = () => {
-        const role = localStorage.getItem("role"); // Get the selected role from localStorage
         navigate(role === "professor" ? "/professor" : "/student");
     };
 
+    {/* 
     const signInWithGoogle = async () => {
         setAuthing(true);
         signInWithPopup(auth, new GoogleAuthProvider())
@@ -29,7 +37,8 @@ const Login = () => {
                 setAuthing(false);
             });
     };
-
+    */}
+    
     const signInWithEmail = async () => {
         setAuthing(true);
         setError('');
@@ -50,7 +59,9 @@ const Login = () => {
         <div className="w-full h-screen flex items-center justify-center bg-[url('/classroom.jpg')] bg-cover bg-center bg-no-repeat">
             <div className='w-full max-w-[450px] bg-white shadow-lg rounded-lg p-10 flex flex-col'>
                 {/* Header */}
-                <h3 className='text-3xl font-bold text-[#1a3d2f] mb-2 text-center'>Login</h3>
+                <h3 className='text-3xl font-bold text-[#1a3d2f] mb-2 text-center'>
+                    {role === "professor" ? "Professor Login" : "Student Login"}
+                </h3>
                 <p className='text-gray-600 text-center mb-6'>Please enter your details.</p>
 
                 {/* Inputs */}
@@ -83,13 +94,13 @@ const Login = () => {
                     Log In
                 </button>
 
-                {/* OR Divider */}
+                {/* Remove this comment if u want to use Google Email
+                
                 <div className='w-full flex items-center justify-center relative py-4'>
                     <div className='w-full h-[1px] bg-gray-300'></div>
                     <p className='text-sm absolute text-gray-500 bg-white px-2'>OR</p>
                 </div>
 
-                {/* Google Login */}
                 <button
                     className='w-full bg-gray-100 text-gray-800 font-semibold rounded-md p-3 text-center flex items-center justify-center cursor-pointer hover:bg-[#219638] hover:text-white transition'
                     onClick={signInWithGoogle}
@@ -97,8 +108,9 @@ const Login = () => {
                 >
                     Continue With Google
                 </button>
-
-                {/* Sign Up Link */}
+                
+                */}
+                {/* Sign Up Link 
                 <div className='w-full flex items-center justify-center mt-6'>
                     <p className='text-sm font-normal text-gray-600'>Don't have an account? 
                         <span
@@ -108,6 +120,7 @@ const Login = () => {
                         </span>
                     </p>
                 </div>
+                */}
             </div>
         </div>
     );

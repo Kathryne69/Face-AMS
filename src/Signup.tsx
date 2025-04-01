@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+//import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from 'firebase/auth'; //for GOOGLE EMAIL
 
 const Signup = () => {
     const auth = getAuth();
@@ -18,6 +19,7 @@ const Signup = () => {
         navigate(role === "professor" ? "/professor" : "/student");
     };
 
+    {/*
     const signUpWithGoogle = async () => {
         setAuthing(true);
         signInWithPopup(auth, new GoogleAuthProvider())
@@ -30,7 +32,7 @@ const Signup = () => {
                 setAuthing(false);
             });
     };
-
+    */}
     const signUpWithEmail = async () => {
         if (password !== confirmPassword) {
             setError('Passwords do not match');
@@ -92,6 +94,7 @@ const Signup = () => {
                     Sign Up
                 </button>
 
+                {/* REMOVE TO HAVE BUTTON FOR GOOGLE EMAIL
                 <div className='w-full flex items-center justify-center relative py-4'>
                     <div className='w-full h-[1px] bg-gray-300'></div>
                     <p className='text-sm absolute text-gray-500 bg-white px-2'>OR</p>
@@ -104,6 +107,7 @@ const Signup = () => {
                 >
                     Sign Up With Google
                 </button>
+                */}
 
                 <div className='w-full flex items-center justify-center mt-6'>
                     <p className='text-sm font-normal text-gray-600'>Already have an account? 
