@@ -1,5 +1,4 @@
 // src/components/ProfProfile.tsx
-import { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from "chart.js";
@@ -11,15 +10,6 @@ interface AttendanceRecord {
     timestamp: string;
     status: string;
 }
-
-const statusToPercentage = (status: string) => {
-    switch (status.toLowerCase()) {
-        case "present": return 100;
-        case "late": return 85;
-        case "absent": return 0;
-        default: return 0;
-    }
-};
 
 interface ProfProfileProps {
     attendanceByStudent: Record<string, AttendanceRecord[]>; 
@@ -159,7 +149,6 @@ const ProfProfile = ({ attendanceByStudent, sortedDates }: ProfProfileProps) => 
             </div>
         </div>
     );
-    
 };
 
 export default ProfProfile;

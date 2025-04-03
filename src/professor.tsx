@@ -1,3 +1,4 @@
+// src/components/ProfessorDashboard.tsx
 import { useState, useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +9,12 @@ import { fetchAttendanceRecords } from "./utils/getAttendance";
 import { checkProfessorEmail } from "./utils/authCheck";
 import ProfProfile from "./components/ProfProfile";
 
+// Update the AttendanceRecord interface: make sessions required
 interface AttendanceRecord {
     name: string;
     timestamp: string;
     status: string;
+    sessions: string; // Make sessions required
 }
 
 const statusToPercentage = (status: string) => {
@@ -40,10 +43,7 @@ const ProfessorDashboard = () => {
     useEffect(() => {
         if (activeTab === "Attendance") {
             setLoading(true);
-            fetchAttendanceRecords((data) => {
-                setAttendance(data);
-                setLoading(false);
-            });
+            fetchAttendanceRecords(setAttendance, setLoading); // ✅ Fix function call
         }
     }, [activeTab]);
 
@@ -82,7 +82,7 @@ const ProfessorDashboard = () => {
         { key: "section3", name: "CPE103 - Mobile Embedded System" },
     ];
 
-    const [collapsedSections, setCollapsedSections] = useState({
+    const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({
         section1: false,
         section2: false,
         section3: false
