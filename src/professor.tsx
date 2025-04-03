@@ -6,27 +6,44 @@ import TopBar from "./components/Topbar";
 import { exportToCSV } from "./utils/exportCsv";
 import { fetchAttendanceRecords } from "./utils/getAttendance";
 import { checkProfessorEmail } from "./utils/authCheck";
+import ProfProfile from "./components/ProfProfile";
+
+interface AttendanceRecord {
+    name: string;
+    timestamp: string;
+    status: string;
+}
+
+const statusToPercentage = (status: string) => {
+    switch (status.toLowerCase()) {
+        case "present": return 100;
+        case "late": return 85;
+        case "absent": return 0;
+        default: return 0;
+    }
+};
 
 const ProfessorDashboard = () => {
     const auth = getAuth();
     const navigate = useNavigate();
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [activeTab, setActiveTab] = useState("Profile");
-    const [attendance, setAttendance] = useState<{ name: string; timestamp: string; status: string; sessions: string }[]>([]);
+    const [activeTab, setActiveTab] = useState("Profile"); // Default to "Profile"
+    const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Check if user is professor
     useEffect(() => {
         checkProfessorEmail(auth, navigate);
     }, [auth, navigate]);
 
-    // Fetch attendance data
     useEffect(() => {
         if (activeTab === "Attendance") {
             setLoading(true);
-            fetchAttendanceRecords(setAttendance, setLoading);
+            fetchAttendanceRecords((data) => {
+                setAttendance(data);
+                setLoading(false);
+            });
         }
     }, [activeTab]);
 
@@ -38,6 +55,43 @@ const ProfessorDashboard = () => {
         record.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Group attendance by student
+    const attendanceByStudent: Record<string, AttendanceRecord[]> = {};
+    filteredAttendance.forEach(record => {
+        if (!attendanceByStudent[record.name]) {
+            attendanceByStudent[record.name] = [];
+        }
+        attendanceByStudent[record.name].push(record);
+    });
+
+    // Get unique sorted dates
+    const sortedDates = Array.from(
+        new Set(filteredAttendance.map(record => new Date(record.timestamp).toLocaleDateString()))
+    ).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+
+    const calculateAvgGrade = (statuses: string[]) => {
+        if (statuses.length === 0) return "0.00";
+        const totalPercentage = statuses.reduce((sum, status) => sum + statusToPercentage(status), 0);
+        return (totalPercentage / statuses.length).toFixed(2);
+    };
+
+    // Define sections with unique names
+    const attendanceSections = [
+        { key: "section1", name: "CPP122 - CpE Practice and Design 2" },
+        { key: "section2", name: "TEC101 - Technopreneurship" },
+        { key: "section3", name: "CPE103 - Mobile Embedded System" },
+    ];
+
+    const [collapsedSections, setCollapsedSections] = useState({
+        section1: false,
+        section2: false,
+        section3: false
+    });
+
+    const toggleCollapse = (sectionKey: string) => {
+        setCollapsedSections(prev => ({ ...prev, [sectionKey]: !prev[sectionKey] }));
+    };
+
     return (
         <div className="h-screen flex flex-col">
             <TopBar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
@@ -45,49 +99,89 @@ const ProfessorDashboard = () => {
             <div className="flex flex-grow">
                 <Sidebar isSidebarOpen={isSidebarOpen} activeTab={activeTab} setActiveTab={setActiveTab} handleLogout={handleLogout} />
 
-                <div className="flex-1 p-6">
+                <div className="flex-1 p-6 bg-[url('/classroom.jpg')]">
                     {activeTab === "Profile" && (
-                        <div>
-                            <h2 className="text-2xl font-semibold">Profile Section</h2>
-                            <p>Professor Kathryne Raizen</p>
-                        </div>
+                        <ProfProfile
+                            attendanceByStudent={attendanceByStudent}
+                            sortedDates={sortedDates}
+                        />
                     )}
-                    {activeTab === "Attendance" && (
-                        <div>
-                            <h2 className="text-2xl font-semibold">All Attendance Records</h2>
 
-                            <input
-                                type="text"
-                                placeholder="Search student..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="mt-2 p-2 border border-gray-300 rounded-md w-full"
-                            />
+                    {activeTab === "Attendance" && attendanceSections.map(({ key, name }) => (
+                        <div key={key} className="p-6 bg-white bg-opacity-90 rounded-lg shadow-lg mb-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-semibold text-gray-900">
+                                    {collapsedSections[key] ? name : "Attendance Records"}
+                                </h2>
+                                <button 
+                                    onClick={() => toggleCollapse(key)} 
+                                    className="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
+                                >
+                                    {collapsedSections[key] ? "⋯" : "⋯"}
+                                </button>
+                            </div>
 
-                            <button
-                                onClick={() => exportToCSV(attendance)}
-                                className="mt-4 bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
-                            >
-                                Export CSV
-                            </button>
+                            {!collapsedSections[key] && (
+                                <>
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between mt-4 gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Search student..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="p-2 border border-gray-400 rounded-md w-full md:w-1/3"
+                                        />
+                                        <button
+                                            onClick={() => exportToCSV(filteredAttendance)}
+                                            className="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded"
+                                        >
+                                            Export CSV
+                                        </button>
+                                    </div>
 
-                            {loading ? (
-                                <p>Loading...</p>
-                            ) : filteredAttendance.length > 0 ? (
-                                <ul className="mt-4 space-y-4">
-                                    {filteredAttendance.map((record, index) => (
-                                        <li key={index} className="p-4 bg-gray-100 rounded-md shadow-md">
-                                            <strong>👤 Student:</strong> {record.name} <br />
-                                            <strong>📅 Date:</strong> {new Date(record.timestamp).toLocaleString()} <br />
-                                            <strong>✅ Status:</strong> {record.status} <br />
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No matching attendance records found.</p>
+                                    {loading ? (
+                                        <p className="text-gray-700 mt-4">Loading...</p>
+                                    ) : filteredAttendance.length > 0 ? (
+                                        <div className="overflow-x-auto mt-4">
+                                            <table className="min-w-full border border-gray-300 bg-white rounded-lg">
+                                                <thead>
+                                                    <tr className="bg-gray-200 text-gray-900">
+                                                        <th className="border border-gray-300 px-4 py-2 text-left">Student</th>
+                                                        {sortedDates.map(date => (
+                                                            <th key={date} className="border border-gray-300 px-4 py-2 text-left">{date}</th>
+                                                        ))}
+                                                        <th className="border border-gray-300 px-4 py-2 text-left">Grade</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {Object.entries(attendanceByStudent).map(([student, records], idx) => {
+                                                        const statusesByDate = sortedDates.map(date => {
+                                                            const record = records.find(r => new Date(r.timestamp).toLocaleDateString() === date);
+                                                            return record ? record.status : "Absent";
+                                                        });
+
+                                                        const avgGrade = calculateAvgGrade(statusesByDate);
+
+                                                        return (
+                                                            <tr key={student} className={idx % 2 === 0 ? "bg-gray-100" : "bg-white"}>
+                                                                <td className="border border-gray-300 px-4 py-2">{student}</td>
+                                                                {statusesByDate.map((status, index) => (
+                                                                    <td key={index} className="border border-gray-300 px-4 py-2">{status}</td>
+                                                                ))}
+                                                                <td className="border border-gray-300 px-4 py-2 font-bold">{avgGrade}%</td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    ) : (
+                                        <p className="text-gray-700 mt-4">No matching attendance records found.</p>
+                                    )}
+                                </>
                             )}
                         </div>
-                    )}
+                    ))}
                 </div>
             </div>
         </div>

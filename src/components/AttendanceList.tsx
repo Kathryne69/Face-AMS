@@ -1,4 +1,3 @@
-// components/AttendanceList.tsx
 import { useState, useEffect } from "react";
 import { ref, onValue, Database } from "firebase/database";
 
@@ -15,26 +14,26 @@ const AttendanceList = ({ db, userName }: AttendanceProps) => {
         if (!userName) return;
 
         setLoading(true);
-        const attendanceRef = ref(db, "Attendance_records:"); // Removed colon for correct path
+        const attendanceRef = ref(db, "Attendance_records"); // Corrected Firebase path
 
         const unsubscribe = onValue(attendanceRef, (snapshot) => {
             const data = snapshot.val();
             const studentRecords: { timestamp: string; status: string; pattern: string }[] = [];
 
             if (data) {
-                const normalizedTargetName = userName.replace(/\s*,\s*/g, ',').toLowerCase();
+                // Normalize the student's name for comparison
+                const normalizedTargetName = userName.trim().toLowerCase();
+                
                 Object.entries(data).forEach(([timestamp, studentList]: [string, any]) => {
                     Object.keys(studentList).forEach((firebaseNameKey) => {
-                        const normalizedFirebaseName = firebaseNameKey.replace(/\s*,\s*/g, ',').toLowerCase();
+                        const normalizedFirebaseName = firebaseNameKey.trim().toLowerCase();
                         if (normalizedFirebaseName === normalizedTargetName) {
                             const studentData = studentList[firebaseNameKey];
-                            if (studentData && 'status' in studentData && 'sessions' in studentData) {
-                                studentRecords.push({
-                                    timestamp,
-                                    status: studentData.status,
-                                    pattern: studentData.sessions,
-                                });
-                            }
+                            studentRecords.push({
+                                timestamp,
+                                status: studentData?.status || "Unknown", // Default if missing
+                                pattern: studentData?.sessions || "N/A",  // Default if missing
+                            });
                         }
                     });
                 });

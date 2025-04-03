@@ -13,8 +13,10 @@
     "deploy": "gh-pages -d dist -r https://github.com/Kathryne69/Face-AMS.git -b gh-pages"
   },
   "dependencies": {
+    "chart.js": "^4.4.8",
     "firebase": "^10.12.4",
     "react": "^18.3.1",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.25.1"
