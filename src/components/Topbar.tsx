@@ -19,8 +19,8 @@ const TopBar: React.FC<TopBarProps> = ({ isSidebarOpen, setIsSidebarOpen, active
 
             <div className="flex space-x-4">
                 <button
-                    className={`p-2 rounded-md ${activeTab === "Profile" ? "bg-gray-700" : "hover:bg-gray-800"}`}
-                    onClick={() => setActiveTab("Profile")}
+                    className={`p-2 rounded-md ${activeTab === "Home" ? "bg-gray-700" : "hover:bg-gray-800"}`}
+                    onClick={() => setActiveTab("Home")}
                 >
                     <FiUser size={24} />
                 </button>
