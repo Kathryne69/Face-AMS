@@ -34,10 +34,8 @@ const App = () => {
     };
 
     return (
-        <div
-            className="w-full h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
-            style={{ backgroundImage: `url(${background})` }}
-        >
+        <div className="w-full h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
+            style={{ backgroundImage: `url(${background})` }} >
             <div className="w-full max-w-sm bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
                 <h3 className="text-2xl sm:text-3xl font-bold text-[#1a3d2f] mb-4 text-center">
                     Welcome to AMS
