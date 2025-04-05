@@ -1,4 +1,3 @@
-// src/components/ProfessorDashboard.tsx
 import { useState, useEffect } from "react";
 import { getAuth, signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -62,6 +61,9 @@ const ProfessorDashboard = () => {
         }
         attendanceByStudent[record.name].push(record);
     });
+
+    // Sort students alphabetically by name
+    const sortedStudentNames = Object.keys(attendanceByStudent).sort();
 
     // Get unique sorted dates
     const sortedDates = Array.from(
@@ -154,7 +156,8 @@ const ProfessorDashboard = () => {
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {Object.entries(attendanceByStudent).map(([student, records], idx) => {
+                                                    {sortedStudentNames.map((student, idx) => {
+                                                        const records = attendanceByStudent[student];
                                                         const statusesByDate = sortedDates.map(date => {
                                                             const record = records.find(r => new Date(r.timestamp).toLocaleDateString() === date);
                                                             return record ? record.status : "Absent";
@@ -182,7 +185,6 @@ const ProfessorDashboard = () => {
                             )}
                         </div>
                     ))}
-
                 </div>
             </div>
         </div>
