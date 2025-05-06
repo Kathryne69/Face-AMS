@@ -38,7 +38,7 @@ const AttendanceList = ({ db, userName }: AttendanceProps) => {
                             const randomSubject = subjects[Math.floor(Math.random() * subjects.length)].name;
                             studentRecords.push({
                                 timestamp,
-                                status: studentData?.status || "Unknown",
+                                status: studentData?.Status || "Unknown",
                                 subject: randomSubject,
                             });
                         }

@@ -20,13 +20,13 @@ export const fetchAttendanceRecords = (
             let allRecords: AttendanceRecord[] = [];
 
             Object.entries(data).forEach(([timestamp, studentList]) => {
-                Object.entries(studentList as Record<string, { status: string; sessions: string }>).forEach(
+                Object.entries(studentList as Record<string, { Status: string; Sessions: string }>).forEach(
                     ([studentName, record]) => {
                         allRecords.push({
                             name: studentName, // Corrected to use the key as the name
                             timestamp,
-                            status: record.status || "Unknown", // Handle missing status
-                            sessions: record.sessions || "N/A", // Handle missing sessions
+                            status: record.Status || "Unknown", // Handle missing status
+                            sessions: record.Sessions || "N/A", // Handle missing sessions
                         });
                     }
                 );

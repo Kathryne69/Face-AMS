@@ -59,7 +59,7 @@ const StudentDashboard = () => {
                         const normalizedFirebaseName = firebaseNameKey.trim().toLowerCase();
 
                         if (normalizedFirebaseName === normalizedTargetName) {
-                            const status = studentList[firebaseNameKey]?.status || "";
+                            const status = studentList[firebaseNameKey]?.Status || "";
                             if (status === "Present") present++;
                             else if (status === "Late") late++;
                             else if (status === "Absent") absent++;
